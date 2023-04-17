@@ -6,7 +6,9 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg"
     android:orientation="vertical"
-    tools:context=".activities.ChatActivity">
+    tools:context=".activities.GroupChatActivity">
+
+
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -109,5 +111,6 @@
             android:src="@drawable/ic_send_icon" />
 
     </androidx.cardview.widget.CardView>
+
 
 </LinearLayout>

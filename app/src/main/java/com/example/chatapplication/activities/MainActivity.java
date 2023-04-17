@@ -14,6 +14,7 @@ import com.example.chatapplication.adaptors.UsersAdaptor;
 import com.example.chatapplication.databinding.ActivityMainBinding;
 import com.example.chatapplication.models.UserModel;
 import com.example.chatapplication.utils.Credentials;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -45,13 +46,26 @@ public class MainActivity extends AppCompatActivity {
 
         database.getReference()
                 .child(Credentials.DATABASE_REF_USERS)
+                .orderByChild(Credentials.DATABASE_REF_LAST_MSG_TIME)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         userModelArrayList.clear();
+
+
+
+
                         for(DataSnapshot snapshot1: snapshot.getChildren()){
-                            userModelArrayList.add(snapshot1.getValue(UserModel.class));
+
+
+
+                            UserModel userModel = snapshot1.getValue(UserModel.class);
+
+                            if(!userModel.getUserId().equals(FirebaseAuth.getInstance().getUid()))
+                            {
+                                userModelArrayList.add(userModel);
+                            }
                         }
                         usersAdaptor.notifyDataSetChanged();
                     }
@@ -87,5 +101,32 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String currentId = FirebaseAuth.getInstance().getUid();
+        database.getReference()
+                .child(Credentials.DATABASE_REF_PRESENCE)
+                .child(currentId)
+                .setValue("Online");
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        String currentId = FirebaseAuth.getInstance().getUid();
+
+        database.getReference()
+                .child(Credentials.DATABASE_REF_PRESENCE)
+                .child(currentId)
+                .setValue("Offline");
+
+
     }
 }

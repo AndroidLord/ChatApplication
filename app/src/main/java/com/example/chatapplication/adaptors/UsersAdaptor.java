@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatapplication.activities.ChatActivity;
 import com.example.chatapplication.R;
 import com.example.chatapplication.databinding.ConverstaionItemBinding;
@@ -58,7 +59,7 @@ public class UsersAdaptor extends RecyclerView.Adapter<UsersAdaptor.ViewHolder> 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        if(snapshot.exists()){
+                        if (snapshot.exists()) {
                             String lastMsg = snapshot.child(Credentials.DATABASE_REF_LAST_MSG).getValue(String.class);
                             long lastMsgTime = snapshot.child(Credentials.DATABASE_REF_LAST_MSG_TIME).getValue(Long.class);
 
@@ -66,11 +67,12 @@ public class UsersAdaptor extends RecyclerView.Adapter<UsersAdaptor.ViewHolder> 
 
                             SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
                             holder.binding.timeItem.setText(dateFormat.format(new Date(lastMsgTime)));
+                            holder.binding.timeItem.setVisibility(View.VISIBLE);
 
 
-                        }
-                        else{
+                        } else {
                             holder.binding.lastMessageItem.setText("Tap To Chat...");
+                            holder.binding.timeItem.setVisibility(View.GONE);
                         }
                     }
 
@@ -80,19 +82,28 @@ public class UsersAdaptor extends RecyclerView.Adapter<UsersAdaptor.ViewHolder> 
                     }
                 });
 
-        Picasso.get().load(userModel.getProfileImage())
+        Glide.with(context)
+                .load(userModel.getProfileImage())
                 .placeholder(R.drawable.avatar)
                 .into(holder.binding.profileImageItem);
+
+//
+//        Picasso.get().load(userModel.getProfileImage())
+//                .placeholder(R.drawable.avatar)
+//                .into(holder.binding.profileImageItem);
 
         holder.binding.userNameItem.setText(userModel.getName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra("name", userModel.getName());
                 intent.putExtra("receiverId", userModel.getUserId());
+                intent.putExtra("profileImage",userModel.getProfileImage());
                 context.startActivity(intent);
+
             }
         });
     }

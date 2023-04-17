@@ -8,13 +8,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatapplication.R;
 import com.example.chatapplication.databinding.ItemSendBinding;
 import com.example.chatapplication.databinding.ReceivedItemBinding;
 import com.example.chatapplication.models.MessageModel;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MessageAdaptor extends RecyclerView.Adapter{
 
@@ -69,13 +72,56 @@ public class MessageAdaptor extends RecyclerView.Adapter{
         if(holder.getClass() == SendViewHolder.class){
 
             SendViewHolder sendViewHolder = (SendViewHolder) holder;
-            sendViewHolder.binding.sendMessage.setText(messageModel.getMessage());
+
+            String url = messageModel.getImageUrl();
+
+            if(url != null){
+            sendViewHolder.binding.sendImage.setVisibility(View.VISIBLE);
+            sendViewHolder.binding.sendMessage.setVisibility(View.GONE);
+                Glide.with(context)
+                        .load(messageModel.getImageUrl())
+                        .placeholder(R.drawable.placeholder)
+                        .into(sendViewHolder.binding.sendImage);
+            }
+            else{
+
+                sendViewHolder.binding.sendMessage.setVisibility(View.VISIBLE);
+                sendViewHolder.binding.sendImage.setVisibility(View.GONE);
+                sendViewHolder.binding.sendMessage.setText(messageModel.getMessage());
+
+            }
+
+            // Message Time
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+            String time = sdf.format(new Date(messageModel.getTimeStamp()));
+            sendViewHolder.binding.messageTime.setText(time);
 
         }else{
 
             ReceivedViewHolder receivedViewHolder = (ReceivedViewHolder) holder;
+
+            String url = messageModel.getImageUrl();
             receivedViewHolder.binding.receivedMessage.setText(messageModel.getMessage());
 
+            if(url != null){
+                receivedViewHolder.binding.receivedImage.setVisibility(View.VISIBLE);
+                receivedViewHolder.binding.receivedMessage.setVisibility(View.GONE);
+                Glide.with(context)
+                        .load(messageModel.getImageUrl())
+                        .placeholder(R.drawable.placeholder)
+                        .into(receivedViewHolder.binding.receivedImage);
+            }
+            else{
+                receivedViewHolder.binding.receivedImage.setVisibility(View.GONE);
+                receivedViewHolder.binding.receivedMessage.setVisibility(View.VISIBLE);
+                receivedViewHolder.binding.receivedMessage.setText(messageModel.getMessage());
+            }
+
+            //Time of Message
+            // Message Time
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+            String time = sdf.format(new Date(messageModel.getTimeStamp()));
+            receivedViewHolder.binding.messageTime.setText(time);
         }
 
     }

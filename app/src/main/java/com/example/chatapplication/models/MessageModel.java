@@ -2,7 +2,7 @@ package com.example.chatapplication.models;
 
 public class MessageModel {
 
-    String message,messageId,senderId;
+    String message,messageId,senderId,imageUrl;
 
     long timeStamp;
 
@@ -22,6 +22,14 @@ public class MessageModel {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getMessageId() {
