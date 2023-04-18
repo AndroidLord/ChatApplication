@@ -11,8 +11,11 @@ public class Credentials {
     public static final String DATABASE_REF_LAST_MSG_TIME = "LastMsgTime";
 
 
-
-
+    public static final String DATABASE_REF_GROUP_CHAT = "GroupChat";
+    public static final String DATABASE_REF_GROUP_CHAT_Members = "Members";
+    public static final String DATABASE_REF_GROUP_CHAT_NAME = "GroupChatName";
+    public static final String DATABASE_REF_GROUP_CHAT_MESSAGES = "GroupChatMessages";
+    public static final String DATABASE_REF_GROUP_CHAT_USER_ID = "UserID";
 
 
     // Reference TO Different Storage

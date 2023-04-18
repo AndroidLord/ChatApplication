@@ -59,6 +59,7 @@
         android:id="@+id/recyclerView_Chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:listitem="@layout/item_send"
         android:layout_weight="1" />
 
     <androidx.cardview.widget.CardView

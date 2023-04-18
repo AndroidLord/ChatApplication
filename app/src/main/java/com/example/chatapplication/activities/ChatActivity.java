@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.chatapplication.R;
+import com.example.chatapplication.adaptors.GroupMessageAdaptor;
 import com.example.chatapplication.adaptors.MessageAdaptor;
 import com.example.chatapplication.databinding.ActivityChatBinding;
 import com.example.chatapplication.models.MessageModel;
@@ -44,6 +45,7 @@ public class ChatActivity extends AppCompatActivity {
     ActivityChatBinding binding;
 
     MessageAdaptor messageAdaptor;
+    GroupMessageAdaptor groupMessageAdaptor;
     ArrayList<MessageModel> messageModelArrayList;
 
     String senderRoom, receiverRoom;
@@ -54,6 +56,8 @@ public class ChatActivity extends AppCompatActivity {
     ProgressDialog dialog;
 
     String receiverId, senderId, profileImage;
+    String groupId;
+    boolean group;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +65,13 @@ public class ChatActivity extends AppCompatActivity {
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
         String name = getIntent().getStringExtra("name");
+
+
         receiverId = getIntent().getStringExtra("receiverId");
         profileImage = getIntent().getStringExtra("profileImage");
+
         senderId = FirebaseAuth.getInstance().getUid();
 
         messageModelArrayList = new ArrayList<>();
@@ -84,199 +92,211 @@ public class ChatActivity extends AppCompatActivity {
                 finish();
             }
         });
-        Glide.with(getApplicationContext())
-                .load(profileImage)
-                .placeholder(R.drawable.avatar)
-                .into(binding.profileImageIV);
 
-        binding.userName.setText(name);
 
-        database.getReference()
-                .child(Credentials.DATABASE_REF_PRESENCE)
-                .child(receiverId)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+            Glide.with(getApplicationContext())
+                    .load(profileImage)
+                    .placeholder(R.drawable.avatar)
+                    .into(binding.profileImageIV);
 
-                        if (snapshot.exists()) {
-                            String status = snapshot.getValue(String.class);
+            // telling Status
+            database.getReference()
+                    .child(Credentials.DATABASE_REF_PRESENCE)
+                    .child(receiverId)
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                            if (status != null) {
+                            if (snapshot.exists()) {
+                                String status = snapshot.getValue(String.class);
 
-                                if(status.equals("Offline")){
-                                    binding.onlineOfflineStatus.setVisibility(View.GONE);
+                                if (status != null) {
+
+                                    if (status.equals("Offline")) {
+                                        binding.onlineOfflineStatus.setVisibility(View.GONE);
+                                    } else {
+
+                                        binding.onlineOfflineStatus.setText(status);
+                                        binding.onlineOfflineStatus.setVisibility(View.VISIBLE);
+
+                                    }
                                 }
-                                 else{
 
-                                    binding.onlineOfflineStatus.setText(status);
-                                    binding.onlineOfflineStatus.setVisibility(View.VISIBLE);
-
-                                }
+                            } else {
+                                binding.onlineOfflineStatus.setVisibility(View.GONE);
                             }
 
-                        } else {
-                            binding.onlineOfflineStatus.setVisibility(View.GONE);
                         }
 
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            binding.onlineOfflineStatus.setVisibility(View.GONE);
+                        }
+                    });
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        binding.onlineOfflineStatus.setVisibility(View.GONE);
-                    }
-                });
-
-        final Handler handler = new Handler();
-        binding.messageEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                database.getReference()
-                        .child(Credentials.DATABASE_REF_PRESENCE)
-                        .child(senderId)
-                        .setValue("Typing...");
-
-                handler.removeCallbacksAndMessages(null);
-                handler.postDelayed(userStoppedTyping,1000);
-
-
-            }
-            Runnable userStoppedTyping = new Runnable() {
+            final Handler handler = new Handler();
+            binding.messageEditText.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void run() {
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
 
                     database.getReference()
                             .child(Credentials.DATABASE_REF_PRESENCE)
                             .child(senderId)
-                            .setValue("Online");
+                            .setValue("Typing...");
+
+                    handler.removeCallbacksAndMessages(null);
+                    handler.postDelayed(userStoppedTyping, 1000);
+
 
                 }
-            };
-        });
 
-
-        messageAdaptor = new MessageAdaptor(getApplicationContext(), messageModelArrayList);
-        binding.recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewChat.setAdapter(messageAdaptor);
-
-        senderRoom = senderId + receiverId;
-        receiverRoom = receiverId + senderId;
-
-        database.getReference()
-                .child(Credentials.DATABASE_REF_CHATS)
-                .child(senderRoom)
-                .child("messages")
-                .addValueEventListener(new ValueEventListener() {
+                Runnable userStoppedTyping = new Runnable() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    public void run() {
 
-                        if (snapshot.exists()) {
+                        database.getReference()
+                                .child(Credentials.DATABASE_REF_PRESENCE)
+                                .child(senderId)
+                                .setValue("Online");
 
-                            messageModelArrayList.clear();
+                    }
+                };
+            });
 
-                            Log.d("chat", "Getting the Data for List ");
 
-                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
 
-                                MessageModel messageModel = snapshot1.getValue(MessageModel.class);
-                                messageModelArrayList.add(messageModel);
+        binding.userName.setText(name);
 
-                                Log.d("chat", " Data: " + messageModel.getMessage());
+
+        SettingUpAdaptorAndRecyclerView();
+
+
+
+            // When user is Chatting with other user
+
+            senderRoom = senderId + receiverId;
+            receiverRoom = receiverId + senderId;
+
+            // retrieving Text
+            database.getReference()
+                    .child(Credentials.DATABASE_REF_CHATS)
+                    .child(senderRoom)
+                    .child("messages")
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.exists()) {
+
+                                messageModelArrayList.clear();
+
+                                Log.d("chat", "Getting the Data for List ");
+
+                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+
+                                    MessageModel messageModel = snapshot1.getValue(MessageModel.class);
+                                    messageModelArrayList.add(messageModel);
+
+                                    Log.d("chat", " Data: " + messageModel.getMessage());
+
+                                }
+                                Log.d("chat", " Data has been added and list updated " + messageModelArrayList.get(0).getMessage());
+                                messageAdaptor.notifyDataSetChanged();
+
+
+                            } else {
+                                // snapshot is empty
+
 
                             }
-                            Log.d("chat", " Data has been added and list updated " + messageModelArrayList.get(0).getMessage());
-                            messageAdaptor.notifyDataSetChanged();
-
-
-                        } else {
-                            // snapshot is empty
-
 
                         }
 
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+            // Sending Text
+            binding.sendIV.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    String message = binding.messageEditText.getText().toString().trim();
+
+                    if (!message.isEmpty()) {
+
+                        binding.messageEditText.setText("");
+
+                        Log.d("chat", "onClick: Message is there: " + message);
+
+                        MessageModel messageModel = new MessageModel(message, senderId, new Date().getTime());
+
+
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put(Credentials.DATABASE_REF_LAST_MSG, messageModel.getMessage());
+                        map.put(Credentials.DATABASE_REF_LAST_MSG_TIME, messageModel.getTimeStamp());
+
+                        database.getReference()
+                                .child(Credentials.DATABASE_REF_CHATS)
+                                .child(senderRoom)
+                                .updateChildren(map);
+
+                        database.getReference()
+                                .child(Credentials.DATABASE_REF_CHATS)
+                                .child(receiverRoom)
+                                .updateChildren(map);
+
+
+                        String RANDOM_KEY = database.getReference().push().getKey();
+
+                        database.getReference()
+                                .child(Credentials.DATABASE_REF_CHATS)
+                                .child(senderRoom)
+                                .child("messages")
+                                .child(RANDOM_KEY)
+                                .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+
+                                        Log.d("chat", " Inside the senderRoom ");
+
+                                        database.getReference()
+                                                .child(Credentials.DATABASE_REF_CHATS)
+                                                .child(receiverRoom)
+                                                .child("messages")
+                                                .child(RANDOM_KEY)
+                                                .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        Log.d("chat", " Inside the receiverRoom ");
+
+                                                    }
+                                                });
+
+                                    }
+                                });
+
+                    } else {
+                        binding.messageEditText.requestFocus();
                     }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+            };
 
-        binding.sendIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String message = binding.messageEditText.getText().toString().trim();
-
-                if (!message.isEmpty()) {
-
-                    binding.messageEditText.setText("");
-
-                    Log.d("chat", "onClick: Message is there: " + message);
-
-                    MessageModel messageModel = new MessageModel(message, senderId, new Date().getTime());
-
-
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put(Credentials.DATABASE_REF_LAST_MSG, messageModel.getMessage());
-                    map.put(Credentials.DATABASE_REF_LAST_MSG_TIME, messageModel.getTimeStamp());
-
-                    database.getReference()
-                            .child(Credentials.DATABASE_REF_CHATS)
-                            .child(senderRoom)
-                            .updateChildren(map);
-
-                    database.getReference()
-                            .child(Credentials.DATABASE_REF_CHATS)
-                            .child(receiverRoom)
-                            .updateChildren(map);
-
-
-                    String RANDOM_KEY = database.getReference().push().getKey();
-
-                    database.getReference()
-                            .child(Credentials.DATABASE_REF_CHATS)
-                            .child(senderRoom)
-                            .child("messages")
-                            .child(RANDOM_KEY)
-                            .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-
-                                    Log.d("chat", " Inside the senderRoom ");
-
-                                    database.getReference()
-                                            .child(Credentials.DATABASE_REF_CHATS)
-                                            .child(receiverRoom)
-                                            .child("messages")
-                                            .child(RANDOM_KEY)
-                                            .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void unused) {
-                                                    Log.d("chat", " Inside the receiverRoom ");
-
-                                                }
-                                            });
-
-                                }
-                            });
-
-                } else {
-                    binding.messageEditText.requestFocus();
-                }
-
-            }
         });
+
 
         binding.attachmentIV.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -290,6 +310,17 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void SettingUpAdaptorAndRecyclerView() {
+        if (group) {
+            groupMessageAdaptor = new GroupMessageAdaptor(getApplicationContext(), messageModelArrayList);
+
+        } else {
+            messageAdaptor = new MessageAdaptor(getApplicationContext(), messageModelArrayList);
+        }
+        binding.recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerViewChat.setAdapter(messageAdaptor);
     }
 
     @Override

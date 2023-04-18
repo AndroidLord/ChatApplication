@@ -4,14 +4,21 @@ public class MessageModel {
 
     String message,messageId,senderId,imageUrl;
 
+    String senderName;
+
     long timeStamp;
 
     public MessageModel() {
     }
 
-    public MessageModel(String message, String senderId, long timeStamp) {
-        this.message = message;
-        this.messageId = messageId;
+    public MessageModel(String message, String senderId, String senderName, long timeStamp) {
+        this(message, senderId, timeStamp);
+        this.senderName = senderName;
+    }
+
+
+    public MessageModel( String senderId,String senderName, long timeStamp) {
+        this.senderName = senderName;
         this.senderId = senderId;
         this.timeStamp = timeStamp;
     }
@@ -22,6 +29,14 @@ public class MessageModel {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public String getImageUrl() {

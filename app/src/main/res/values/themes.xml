@@ -11,6 +11,13 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/blue</item>
+        <item name="actionModeStyle">@style/ActionModeStyle</item>
+
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="ActionModeStyle" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="android:background">@color/blue</item>
+    </style>
+
 </resources>
