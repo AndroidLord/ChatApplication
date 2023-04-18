@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
     android:orientation="vertical"
     tools:context=".activities.ChatActivity">
 
@@ -12,6 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:background="@color/blue" >
 
         <ImageView
@@ -57,6 +57,9 @@
         android:id="@+id/recyclerView_Chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:stackFromEnd="true"
+        android:orientation="vertical"
+        android:overScrollMode="never"
         android:layout_weight="1" />
 
     <androidx.cardview.widget.CardView
@@ -97,8 +100,19 @@
                 android:padding="10dp" />
 
 
-
         </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/pdfImageView"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_picture_icon"
+            android:layout_gravity="end|center_vertical"
+            app:tint="#837F7F"
+            android:layout_marginEnd="50dp"/>
+                />
+
 
         <ImageView
             android:id="@+id/send_IV"

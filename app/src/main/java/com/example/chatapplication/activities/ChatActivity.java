@@ -7,9 +7,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -22,6 +24,8 @@ import com.example.chatapplication.adaptors.GroupMessageAdaptor;
 import com.example.chatapplication.adaptors.MessageAdaptor;
 import com.example.chatapplication.databinding.ActivityChatBinding;
 import com.example.chatapplication.models.MessageModel;
+import com.example.chatapplication.models.PdfModel;
+import com.example.chatapplication.models.UserModel;
 import com.example.chatapplication.utils.Credentials;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,12 +33,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -177,7 +184,12 @@ public class ChatActivity extends AppCompatActivity {
         binding.userName.setText(name);
 
 
-        SettingUpAdaptorAndRecyclerView();
+        messageAdaptor = new MessageAdaptor(getApplicationContext(), messageModelArrayList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        //linearLayoutManager.setReverseLayout(true);
+        binding.recyclerViewChat.setLayoutManager(linearLayoutManager);
+
+        binding.recyclerViewChat.setAdapter(messageAdaptor);
 
 
         // When user is Chatting with other user
@@ -306,29 +318,31 @@ public class ChatActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
-                startActivityForResult(intent, Credentials.REQUEST_CODE_ATTACHMENT);
+                startActivityForResult(intent, Credentials.REQUEST_CODE_ATTACHMENT_PHOTO);
+
+            }
+        });
+
+        binding.pdfImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent();
+                intent.setType("application/pdf");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,"Select PDF File"),Credentials.REQUEST_CODE_ATTACHMENT_PDF);
 
             }
         });
 
     }
 
-    private void SettingUpAdaptorAndRecyclerView() {
-        if (group) {
-            groupMessageAdaptor = new GroupMessageAdaptor(getApplicationContext(), messageModelArrayList);
-
-        } else {
-            messageAdaptor = new MessageAdaptor(getApplicationContext(), messageModelArrayList);
-        }
-        binding.recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewChat.setAdapter(messageAdaptor);
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Credentials.REQUEST_CODE_ATTACHMENT) {
+        if (requestCode == Credentials.REQUEST_CODE_ATTACHMENT_PHOTO) {
 
             if (data != null) {
 
@@ -341,6 +355,126 @@ public class ChatActivity extends AppCompatActivity {
             }
 
         }
+
+        if(requestCode == Credentials.REQUEST_CODE_ATTACHMENT_PDF && resultCode==RESULT_OK){
+
+            if(data!=null && data.getData()!=null){
+
+                Uri uri = data.getData();
+
+                // Getting the name of the pdf
+                String uriString = uri.toString();
+                File myFile = new File(uriString);
+                String path = myFile.getAbsolutePath();
+                String displayName = null;
+
+                if(uriString.startsWith("content://")){
+
+                    Cursor cursor = null;
+                    try{
+                        cursor = this.getContentResolver().query(uri,null,null,null);
+
+                        if(cursor!=null && cursor.moveToFirst()){
+                            displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                        }
+
+                    }finally {
+                        cursor.close();
+                    }
+
+                }
+                else if(uriString.startsWith("file://")){
+                    displayName = myFile.getName();
+                }
+                Toast.makeText(this, "PDF Name: " + displayName, Toast.LENGTH_SHORT).show();
+                uploadPDF(uri,displayName);
+
+            }
+
+        }
+
+    }
+
+    private void uploadPDF(Uri data,String displayName) {
+
+    final ProgressDialog pdfDialod = new ProgressDialog(this);
+    pdfDialod.setTitle("Uploading PDF...");
+    pdfDialod.show();
+
+    final StorageReference reference = storage.getReference()
+            .child("Pdfs")
+            .child("uploads/"+System.currentTimeMillis()+".pdf");
+
+
+    reference.putFile(data)
+            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    while (!uriTask.isComplete());
+                    Uri uri = uriTask.getResult();
+
+                    pdfDialod.dismiss();
+
+                    MessageModel messageModel = new MessageModel(null,senderId,null,new Date().getTime(),uri.toString(),displayName);
+
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put(Credentials.DATABASE_REF_LAST_MSG, "PDF "+displayName);
+                    map.put(Credentials.DATABASE_REF_LAST_MSG_TIME, messageModel.getTimeStamp());
+
+                    database.getReference()
+                            .child(Credentials.DATABASE_REF_CHATS)
+                            .child(senderRoom)
+                            .updateChildren(map);
+
+                    database.getReference()
+                            .child(Credentials.DATABASE_REF_CHATS)
+                            .child(receiverRoom)
+                            .updateChildren(map);
+
+
+                    String RANDOM_KEY = database.getReference().push().getKey();
+
+                    database.getReference()
+                            .child(Credentials.DATABASE_REF_CHATS)
+                            .child(senderRoom)
+                            .child("messages")
+                            .child(RANDOM_KEY)
+                            .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+
+                                    Log.d("chat", " Inside the senderRoom(PDF VERSION) ");
+
+                                    database.getReference()
+                                            .child(Credentials.DATABASE_REF_CHATS)
+                                            .child(receiverRoom)
+                                            .child("messages")
+                                            .child(RANDOM_KEY)
+                                            .setValue(messageModel).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    Log.d("chat", " Inside the receiverRoom(PDF VERSION) ");
+
+                                                }
+                                            });
+
+                                }
+                            });
+
+
+
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                    float percent = (100 * snapshot.getBytesTransferred())/(snapshot.getTotalByteCount());
+                    pdfDialod.setMessage("Uploaded: " + (int)percent+"%");
+
+                }
+            });
 
     }
 

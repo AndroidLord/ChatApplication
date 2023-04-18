@@ -9,18 +9,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.example.chatapplication.R;
 import com.example.chatapplication.adaptors.GroupMessageAdaptor;
-import com.example.chatapplication.adaptors.MessageAdaptor;
-import com.example.chatapplication.databinding.ActivityChatBinding;
 import com.example.chatapplication.databinding.ActivityGroupChatBinding;
 import com.example.chatapplication.models.MessageModel;
 import com.example.chatapplication.utils.Credentials;
@@ -214,7 +207,7 @@ public class GroupChatActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
-                startActivityForResult(intent, Credentials.REQUEST_CODE_ATTACHMENT);
+                startActivityForResult(intent, Credentials.REQUEST_CODE_ATTACHMENT_PHOTO);
 
             }
         });
@@ -226,7 +219,7 @@ public class GroupChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Credentials.REQUEST_CODE_ATTACHMENT) {
+        if (requestCode == Credentials.REQUEST_CODE_ATTACHMENT_PHOTO) {
 
             if (data != null) {
 

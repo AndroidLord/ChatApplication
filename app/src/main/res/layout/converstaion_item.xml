@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:elevation="20dp"
     android:layout_height="wrap_content"
+    android:maxHeight="80dp"
     android:background="?selectableItemBackground">
 
 
@@ -36,8 +37,12 @@
             <TextView
                 android:id="@+id/lastMessage_item"
                 android:layout_width="wrap_content"
+                android:maxWidth="200dp"
                 android:layout_height="wrap_content"
+                android:maxHeight="70dp"
                 android:fontFamily="@font/roboto_light"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="Tap To Chat"
                 android:textColor="@color/black"
                 android:textSize="15dp" />

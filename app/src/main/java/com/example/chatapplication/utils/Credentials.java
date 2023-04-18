@@ -26,7 +26,9 @@ public class Credentials {
 
 
     // Differenct Request Code Hub..
-    public static final int REQUEST_CODE_ATTACHMENT = 25;
+    public static final int REQUEST_CODE_ATTACHMENT_PHOTO = 25;
+
+    public static final int REQUEST_CODE_ATTACHMENT_PDF = 26;
 
 
 }

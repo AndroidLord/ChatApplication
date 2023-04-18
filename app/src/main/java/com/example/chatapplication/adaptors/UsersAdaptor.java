@@ -22,6 +22,7 @@ import com.example.chatapplication.utils.Credentials;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -29,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class UsersAdaptor extends RecyclerView.Adapter<UsersAdaptor.ViewHolder> {
 
@@ -79,47 +81,58 @@ public class UsersAdaptor extends RecyclerView.Adapter<UsersAdaptor.ViewHolder> 
         String senderRoom = senderId + userModel.getUserId();
 
         // Setting Time and Last message
-        FirebaseDatabase.getInstance()
-                .getReference()
-                .child(Credentials.DATABASE_REF_CHATS)
-                .child(senderRoom)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        if(userModel.isGroup()){
+            holder.binding.lastMessageItem.setText("Lets Group Chat...");
 
-                        if (snapshot.exists()) {
-                            String lastMsg = snapshot.child(Credentials.DATABASE_REF_LAST_MSG).getValue(String.class);
-                            long lastMsgTime = snapshot.child(Credentials.DATABASE_REF_LAST_MSG_TIME).getValue(Long.class);
+            // setting up profile image
+            Glide.with(context)
+                    .load(userModel.getProfileImage())
+                    .placeholder(R.drawable.meeting)
+                    .into(holder.binding.profileImageItem);
 
-                            holder.binding.lastMessageItem.setText(lastMsg);
+        }
+        else{
 
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-                            holder.binding.timeItem.setText(dateFormat.format(new Date(lastMsgTime)));
-                            holder.binding.timeItem.setVisibility(View.VISIBLE);
+            FirebaseDatabase.getInstance()
+                    .getReference()
+                    .child(Credentials.DATABASE_REF_CHATS)
+                    .child(senderRoom)
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.exists()) {
+                                String lastMsg = snapshot.child(Credentials.DATABASE_REF_LAST_MSG).getValue(String.class);
+                                long lastMsgTime = snapshot.child(Credentials.DATABASE_REF_LAST_MSG_TIME).getValue(Long.class);
+
+                                holder.binding.lastMessageItem.setText(lastMsg);
+
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
+                                holder.binding.timeItem.setText(dateFormat.format(new Date(lastMsgTime)));
+                                holder.binding.timeItem.setVisibility(View.VISIBLE);
 
 
-                        } else {
-                            holder.binding.lastMessageItem.setText("Tap To Chat...");
-                            holder.binding.timeItem.setVisibility(View.GONE);
+                            } else {
+                                holder.binding.lastMessageItem.setText("Tap To Chat...");
+                                holder.binding.timeItem.setVisibility(View.GONE);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+                        }
+                    });
 
-        // setting up profile image
-        Glide.with(context)
-                .load(userModel.getProfileImage())
-                .placeholder(R.drawable.avatar)
-                .into(holder.binding.profileImageItem);
+            // setting up profile image
+            Glide.with(context)
+                    .load(userModel.getProfileImage())
+                    .placeholder(R.drawable.avatar)
+                    .into(holder.binding.profileImageItem);
 
-//
-//        Picasso.get().load(userModel.getProfileImage())
-//                .placeholder(R.drawable.avatar)
-//                .into(holder.binding.profileImageItem);
+
+        }
+
 
         holder.binding.userNameItem.setText(userModel.getName());
 
