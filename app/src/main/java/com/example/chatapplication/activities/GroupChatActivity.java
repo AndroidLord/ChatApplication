@@ -55,7 +55,7 @@ public class GroupChatActivity extends AppCompatActivity {
     FirebaseStorage storage;
     ProgressDialog dialog;
 
-    String profileImage, groupId, senderId,senderName;
+    String profileImage, groupId, senderId, senderName;
     boolean group;
 
     @Override
@@ -67,8 +67,8 @@ public class GroupChatActivity extends AppCompatActivity {
         String name = getIntent().getStringExtra("name");
 
 
-            groupId = getIntent().getStringExtra("groupId");
-            profileImage = getIntent().getStringExtra("profileImage");
+        groupId = getIntent().getStringExtra("groupId");
+        profileImage = getIntent().getStringExtra("profileImage");
 
         senderId = FirebaseAuth.getInstance().getUid();
 
@@ -107,118 +107,117 @@ public class GroupChatActivity extends AppCompatActivity {
         binding.recyclerViewChat.setAdapter(groupMessageAdaptor);
 
 
-            // Two Things will be done here?
-            // 1) Retrive the Data
-            // 2) Send the Data, when pressed
-            // Remember to work on Attachment for Group, as it will cause error
+        // Two Things will be done here?
+        // 1) Retrive the Data
+        // 2) Send the Data, when pressed
+        // Remember to work on Attachment for Group, as it will cause error
 
         // Point (1) Completed, Retrieve Message
-            database.getReference()
-                    .child(Credentials.DATABASE_REF_GROUP_CHAT)
-                    .child(groupId)
-                    .child(Credentials.DATABASE_REF_GROUP_CHAT_MESSAGES)
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+        database.getReference()
+                .child(Credentials.DATABASE_REF_GROUP_CHAT)
+                .child(groupId)
+                .child(Credentials.DATABASE_REF_GROUP_CHAT_MESSAGES)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                            if(snapshot.exists()){
-                                // Data is there in Group Chat
-                                messageModelArrayList.clear();
-                                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-                                    MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
-                                    messageModelArrayList.add(messageModel);
-                                    Log.d("group", "onDataChange: " + messageModel.getSenderName() +"\n Message: " + messageModel.getMessage());
-                                }
-                                groupMessageAdaptor.notifyDataSetChanged();
+                        if (snapshot.exists()) {
+                            // Data is there in Group Chat
+                            messageModelArrayList.clear();
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
+                                messageModelArrayList.add(messageModel);
+                                Log.d("group", "onDataChange: " + messageModel.getSenderName() + "\n Message: " + messageModel.getMessage());
                             }
-                            else{
-                                // Chat Group is empty
-                            }
-
+                            groupMessageAdaptor.notifyDataSetChanged();
+                        } else {
+                            // Chat Group is empty
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-            // Point (2) Completed, Send Message
-            binding.sendIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    String message = binding.messageEditText.getText().toString().trim();
-
-                    if (!message.isEmpty()) {
-                        binding.messageEditText.setText("");
-
-                        Log.d("chat", "onClick: Message is there: " + message);
-
-                        database.getReference()
-                                .child(Credentials.DATABASE_REF_USERS)
-                                .child(senderId)
-                                .child("name")
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                        String senderName = snapshot.getValue(String.class);
-                                        Log.d("group", "onDataChange: SenderName: " + senderName);
-
-                                        MessageModel messageModel = new MessageModel(message, senderId, senderName, new Date().getTime());
-
-
-                                        HashMap<String, Object> map = new HashMap<>();
-                                        map.put(Credentials.DATABASE_REF_LAST_MSG, messageModel.getMessage());
-                                        map.put(Credentials.DATABASE_REF_LAST_MSG_TIME, messageModel.getTimeStamp());
-
-                                        database.getReference()
-                                                .child(Credentials.DATABASE_REF_GROUP_CHAT)
-                                                .child(groupId)
-                                                .updateChildren(map);
-
-                                        String RANDOM_KEY = database.getReference().push().getKey();
-
-                                        database.getReference()
-                                                .child(Credentials.DATABASE_REF_GROUP_CHAT)
-                                                .child(groupId)
-                                                .child(Credentials.DATABASE_REF_GROUP_CHAT_MESSAGES)
-                                                .child(RANDOM_KEY)
-                                                .setValue(messageModel);
-
-                                        groupMessageAdaptor.notifyDataSetChanged();
-
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-
-                    } else {
-                        // if the text is empty
-                        Toast.makeText(GroupChatActivity.this, "Please Enter a message", Toast.LENGTH_SHORT).show();
                     }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
+                    }
+                });
+
+        // Point (2) Completed, Send Message
+        binding.sendIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String message = binding.messageEditText.getText().toString().trim();
+
+                if (!message.isEmpty()) {
+                    binding.messageEditText.setText("");
+
+                    Log.d("chat", "onClick: Message is there: " + message);
+
+                    database.getReference()
+                            .child(Credentials.DATABASE_REF_USERS)
+                            .child(senderId)
+                            .child("name")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    String senderName = snapshot.getValue(String.class);
+                                    Log.d("group", "onDataChange: SenderName: " + senderName);
+
+                                    MessageModel messageModel = new MessageModel(message, senderId, senderName, new Date().getTime());
+
+
+                                    HashMap<String, Object> map = new HashMap<>();
+                                    map.put(Credentials.DATABASE_REF_LAST_MSG, messageModel.getMessage());
+                                    map.put(Credentials.DATABASE_REF_LAST_MSG_TIME, messageModel.getTimeStamp());
+
+                                    database.getReference()
+                                            .child(Credentials.DATABASE_REF_GROUP_CHAT)
+                                            .child(groupId)
+                                            .updateChildren(map);
+
+                                    String RANDOM_KEY = database.getReference().push().getKey();
+
+                                    database.getReference()
+                                            .child(Credentials.DATABASE_REF_GROUP_CHAT)
+                                            .child(groupId)
+                                            .child(Credentials.DATABASE_REF_GROUP_CHAT_MESSAGES)
+                                            .child(RANDOM_KEY)
+                                            .setValue(messageModel);
+
+                                    groupMessageAdaptor.notifyDataSetChanged();
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+
+                } else {
+                    // if the text is empty
+                    Toast.makeText(GroupChatActivity.this, "Please Enter a message", Toast.LENGTH_SHORT).show();
                 }
-            });
 
-            binding.attachmentIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    intent.setType("image/*");
-                    startActivityForResult(intent,Credentials.REQUEST_CODE_ATTACHMENT);
+            }
+        });
 
-                }
-            });
+        binding.attachmentIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, Credentials.REQUEST_CODE_ATTACHMENT);
+
+            }
+        });
 
     }
 
@@ -251,11 +250,11 @@ public class GroupChatActivity extends AppCompatActivity {
                 .child(Credentials.DATABASE_REF_CHATS)
                 .child(calendar.getTimeInMillis() + "");
 
-
+        dialog.show();
         storageReference.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-
+                dialog.dismiss();
                 if (task.isSuccessful()) {
 
                     storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -284,7 +283,7 @@ public class GroupChatActivity extends AppCompatActivity {
                                                 Log.d("group", "onClick: ImageUrl is there: " + imageUrl);
 
 
-                                                MessageModel messageModel = new MessageModel( null,senderId,senderName,new Date().getTime());
+                                                MessageModel messageModel = new MessageModel(null, senderId, senderName, new Date().getTime());
                                                 messageModel.setImageUrl(imageUrl);
 
                                                 HashMap<String, Object> map = new HashMap<>();

@@ -261,8 +261,16 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
 
                     usersAdaptor.notifyDataSetChanged();
 
+                    UserModel userModel = new UserModel(null,name,true,groupReference.getKey());
+                    userModelArrayList.add(userModel);
+                    usersAdaptor.notifyDataSetChanged();
+
+
+                    selectedUserList.clear();
+                    usersAdaptor.updateSelectedUserList(false);
+                    updateActionModeTitle();
                     Intent intent = new Intent(MainActivity.this, GroupChatActivity.class);
-                    intent.putExtra("userName", name);
+                    intent.putExtra("name", name);
                     intent.putExtra("groupId",groupReference.getKey());
                     startActivity(intent);
 
