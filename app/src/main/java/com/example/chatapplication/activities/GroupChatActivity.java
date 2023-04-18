@@ -283,7 +283,8 @@ public class GroupChatActivity extends AppCompatActivity {
 
                                                 Log.d("group", "onClick: ImageUrl is there: " + imageUrl);
 
-                                                MessageModel messageModel = new MessageModel( senderId,senderName, new Date().getTime());
+
+                                                MessageModel messageModel = new MessageModel( null,senderId,senderName,new Date().getTime());
                                                 messageModel.setImageUrl(imageUrl);
 
                                                 HashMap<String, Object> map = new HashMap<>();

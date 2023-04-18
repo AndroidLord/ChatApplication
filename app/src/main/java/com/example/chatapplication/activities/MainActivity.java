@@ -99,9 +99,11 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
         DatabaseReference groupRef = database.getReference()
                 .child(Credentials.DATABASE_REF_GROUP_CHAT);
 
-        groupRef.addValueEventListener(new ValueEventListener() {
+        groupRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                List<UserModel> userModels = new ArrayList<>();
 
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
 
@@ -117,12 +119,12 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
                             String id = myGrpRef.getKey();
 
                             UserModel userModel = new UserModel(id, grpName, true,snapshot1.getKey());
-                            userModelArrayList.add(userModel);
+                            userModels.add(userModel);
                         }
                     }
                 }
 
-
+                userModelArrayList.addAll(userModels);
                 usersAdaptor.notifyDataSetChanged();
 
             }
@@ -261,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
 
                     Intent intent = new Intent(MainActivity.this, GroupChatActivity.class);
                     intent.putExtra("userName", name);
+                    intent.putExtra("groupId",groupReference.getKey());
                     startActivity(intent);
 
 

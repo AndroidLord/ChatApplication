@@ -241,7 +241,8 @@ public class ChatActivity extends AppCompatActivity {
 
                         Log.d("chat", "onClick: Message is there: " + message);
 
-                        MessageModel messageModel = new MessageModel(message, senderId, new Date().getTime());
+                        // ID, Message, Timestamp
+                        MessageModel messageModel = new MessageModel(message,senderId,null,new Date().getTime());
 
 
                         HashMap<String, Object> map = new HashMap<>();
@@ -373,7 +374,7 @@ public class ChatActivity extends AppCompatActivity {
 
                                 Log.d("chat", "onClick: ImageUrl is there: " + imageUrl);
 
-                                MessageModel messageModel = new MessageModel(null, senderId, new Date().getTime());
+                                MessageModel messageModel = new MessageModel(null,senderId,null,new Date().getTime());
                                 messageModel.setImageUrl(imageUrl);
                                 messageModel.setSenderId(senderId);
 

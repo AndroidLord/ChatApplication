@@ -11,15 +11,12 @@ public class MessageModel {
     public MessageModel() {
     }
 
+
+
     public MessageModel(String message, String senderId, String senderName, long timeStamp) {
-        this(message, senderId, timeStamp);
-        this.senderName = senderName;
-    }
-
-
-    public MessageModel( String senderId,String senderName, long timeStamp) {
-        this.senderName = senderName;
+        this.message = message;
         this.senderId = senderId;
+        this.senderName = senderName;
         this.timeStamp = timeStamp;
     }
 
@@ -29,22 +26,6 @@ public class MessageModel {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public String getMessageId() {
@@ -61,6 +42,22 @@ public class MessageModel {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public long getTimeStamp() {
