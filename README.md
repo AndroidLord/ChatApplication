@@ -35,3 +35,6 @@ This is a chat application that allows users to communicate with each other in r
 
 ## Contributions
 Contributions are welcome! If you find any issues or have suggestions for improvement, please create a pull request or issue on GitHub.
+
+## Conclusion
+The Chat Application is a dynamic and interactive way for users to chat with each other and form groups. With its easy-to-use interface and OTP verification, it is a secure and convenient way to stay connected with your friends and colleagues. By leveraging the power of Firebase Realtime Database and Firebase Storage, the Chat Application provides a robust platform for real-time chat and sharing of files.
