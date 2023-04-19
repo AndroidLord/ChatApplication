@@ -36,7 +36,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    private static String verificationId = "";
+    private static String verificationId;
 
     private ProgressDialog progressDialog;
 

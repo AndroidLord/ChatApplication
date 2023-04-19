@@ -16,7 +16,7 @@ public class PhoneNumberActivity extends AppCompatActivity {
 
     ActivityPhoneNumberBinding binding;
 
-    FirebaseAuth auth;
+    FirebaseAuth firebaseAuth;
     FirebaseAuth.AuthStateListener authStateListener;
     FirebaseUser currentUser;
 
@@ -26,12 +26,15 @@ public class PhoneNumberActivity extends AppCompatActivity {
         binding = ActivityPhoneNumberBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        auth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                currentUser = auth.getCurrentUser();
+
+                currentUser = firebaseAuth.getCurrentUser();
+
                 if(currentUser != null){
                     Intent intent = new Intent(PhoneNumberActivity.this,MainActivity.class);
                     startActivity(intent);
@@ -85,15 +88,17 @@ public class PhoneNumberActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        auth = FirebaseAuth.getInstance();
-        auth.addAuthStateListener(authStateListener);
+        currentUser = firebaseAuth.getCurrentUser();
+        firebaseAuth.addAuthStateListener(authStateListener);
 
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        auth.removeAuthStateListener(authStateListener);
+    protected void onStop() {
+        super.onStop();
+        if (authStateListener != null) {
+            firebaseAuth.removeAuthStateListener(authStateListener);
+        }
     }
+
 }

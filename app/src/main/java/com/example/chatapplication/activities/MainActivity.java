@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -23,7 +25,9 @@ import com.example.chatapplication.models.MembersModel;
 import com.example.chatapplication.models.UserModel;
 import com.example.chatapplication.utils.Credentials;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
 
     FirebaseDatabase database;
     ArrayList<UserModel> userModelArrayList;
+    FirebaseAuth firebaseAuth;
+    FirebaseAuth.AuthStateListener authStateListener;
+    FirebaseUser currentUser;
     UserModel myUserData;
 
     private ActionMode actionMode;
@@ -57,6 +64,25 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
         setSupportActionBar(binding.toolbar);
 
         database = FirebaseDatabase.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
+          currentUser = firebaseAuth.getCurrentUser();
+
+          if(currentUser==null){
+              Snackbar.make(binding.toolbar,"Signed Out",Snackbar.LENGTH_SHORT).show();
+              firebaseAuth.signOut();
+              finishAffinity();
+              startActivity(new Intent(MainActivity.this,PhoneNumberActivity.class));
+          }
+
+
+            }
+        };
+
         userModelArrayList = new ArrayList<>();
 
         usersAdaptor = new UsersAdaptor(MainActivity.this, userModelArrayList);
@@ -153,8 +179,42 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
         if (id == R.id.setting_menu) {
             Toast.makeText(this, "Setting", Toast.LENGTH_SHORT).show();
         }
+        if (id == R.id.logout_menu) {
 
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Logout")
+                    .setMessage("Do You Want To Logout")
+                    .setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+
+                            firebaseAuth.signOut();
+
+
+                        }
+                    })
+                    .setNeutralButton("Return", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(MainActivity.this, "Back.", Toast.LENGTH_SHORT).show();
+                        }
+                    }).show();
+
+
+
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        currentUser = firebaseAuth.getCurrentUser();
+        firebaseAuth.addAuthStateListener(authStateListener);
+
     }
 
     @Override
@@ -190,6 +250,16 @@ public class MainActivity extends AppCompatActivity implements UsersAdaptor.OnUs
                 .child(currentId)
                 .setValue("Offline");
 
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (authStateListener != null) {
+            firebaseAuth.removeAuthStateListener(authStateListener);
+        }
 
     }
 
