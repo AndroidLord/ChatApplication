@@ -25,13 +25,36 @@ This is a chat application that allows users to communicate with each other in r
 - Connect your device or emulator
 - Build and run the application
 ## Screenshots
-### Login Screen
+### Login Screen & OTP Verification
+<div style="display: flex; overflow-x: scroll; white-space: nowrap; width: 100%; flex-wrap: nowrap;">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/phoneNo.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/otp%20ver1.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/otp%20ver2.jpg" width="320" height="640">
+ </div>
 
-### OTP Verification Screen
+### Profile Page & Chat Screen
+
+<div style="display: flex; overflow-x: scroll; white-space: nowrap; width: 100%; flex-wrap: nowrap;">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/profile%20page.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/users%20page.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/users%20page%202.jpg" width="320" height="640">
+</div>
+
 
 ### Chat Screen
 
-### Group Chat Screen
+<div style="display: flex; overflow-x: scroll; white-space: nowrap; width: 100%; flex-wrap: nowrap;">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/chat%20page.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/pdf%20send.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/uploading%20pdf.jpg" width="320" height="640">
+</div>
+
+### Creating Group & Loging out
+<div style="display: flex; overflow-x: scroll; white-space: nowrap; width: 100%; flex-wrap: nowrap;">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/creating%20group.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/group%20created.jpg" width="320" height="640">
+  <img src="https://github.com/AndroidLord/ChatApplication/blob/master/images/logout%20page.jpg" width="320" height="640">
+</div>
 
 ## Contributions
 Contributions are welcome! If you find any issues or have suggestions for improvement, please create a pull request or issue on GitHub.
